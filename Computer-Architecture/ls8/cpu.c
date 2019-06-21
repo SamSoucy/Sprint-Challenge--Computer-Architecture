@@ -76,12 +76,17 @@ void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB
     case ALU_CMP:
       if (cpu->registers[regA] == cpu->registers[regB])
       {
-        cpu->FL = 1;
+        cpu->FL = 0b00000001;
       }
       else if (cpu->registers[regA] > cpu->registers[regB])
       {
-        cpu->FL = 0;
+        cpu->FL = 0b00000010;
       }
+      else if (cpu->registers[regA] < cpu->registers[regB]){
+        
+        cpu->FL = 0b00000100;
+      }
+
       break;
 
     // TODO: implement more ALU ops
@@ -123,7 +128,9 @@ void cpu_run(struct cpu *cpu)
     else if (operands == 1)
     {
       operandA = cpu_ram_read(cpu, (cpu->PC + 1) & 0xff);
+
     }
+    printf("TRACE: cpu-PC: %d: cpu-IR: %02X operand0: %02x operand1: %02x\n", cpu->PC, IR, operandA, operandB);
     // 4. switch() over it to decide on a course of action.
     switch(IR){
       // 5. Do whatever the instruction should do according to the spec.
@@ -164,28 +171,28 @@ void cpu_run(struct cpu *cpu)
         alu(cpu, ALU_ADD, operandA, operandB);
         break;
 
-     case CMP:
-      alu(cpu, ALU_CMP, operandA, operandB);
-      break;
+      case CMP:
+        alu(cpu, ALU_CMP, operandA, operandB);
+        break;
 
       case JMP:
         cpu->PC = cpu->registers[operandA];
-        cpu->PC += 1;
+        // cpu->PC += 1;
         break;
 
       case JEQ:
         if(cpu->FL == 1){
           cpu->PC = cpu->registers[operandA];
-          cpu->PC -= 1;
+          // cpu->PC -= 1;
         }
         break;
 
       case JNE:
-      if (cpu->FL != 1){
-        cpu->PC = cpu->registers[operandA];
-        cpu->PC -= 1;
-      }
-      break;
+        if (!(cpu->FL & 1)){
+          cpu->PC = cpu->registers[operandA];
+          
+        }
+        break;
 
       default:
         break;
