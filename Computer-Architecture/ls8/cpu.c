@@ -163,7 +163,12 @@ void cpu_run(struct cpu *cpu)
       else if (cpu->registers[operandA]< cpu->registers[operandB]){
         cpu->FL = 1;
       }
-      break;
+        break;
+
+      case JMP:
+        cpu->PC = cpu->registers[operandA];
+        operands = 0;
+        break;
 
       default:
         break;
