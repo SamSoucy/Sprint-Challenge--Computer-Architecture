@@ -153,6 +153,18 @@ void cpu_run(struct cpu *cpu)
         alu(cpu, ALU_ADD, operandA, operandB);
         break;
 
+      case CMP:
+      if(cpu->registers[operandA] == cpu->registers[operandB]){
+        cpu->FL = 1;
+      }
+      else if (cpu->registers[operandA] > cpu->registers[operandB]){
+        cpu->FL = 1;
+      }
+      else if (cpu->registers[operandA]< cpu->registers[operandB]){
+        cpu->FL = 1;
+      }
+      break;
+
       default:
         break;
     }
