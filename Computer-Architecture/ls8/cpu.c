@@ -73,7 +73,18 @@ void alu(struct cpu *cpu, enum alu_op op, unsigned char regA, unsigned char regB
       cpu->registers[regA] += cpu->registers[regB];
       break;
 
-      // TODO: implement more ALU ops
+    case ALU_CMP:
+      if (cpu->registers[regA] == cpu->registers[regB])
+      {
+        cpu->FL = 1;
+      }
+      else if (cpu->registers[regA] > cpu->registers[regB])
+      {
+        cpu->FL = 0;
+      }
+      break;
+
+    // TODO: implement more ALU ops
   }
 }
 
@@ -153,29 +164,28 @@ void cpu_run(struct cpu *cpu)
         alu(cpu, ALU_ADD, operandA, operandB);
         break;
 
-      case CMP:
-        if(cpu->registers[operandA] == cpu->registers[operandB]){
-          cpu->FL = 1;
-        }
-        else if (cpu->registers[operandA] > cpu->registers[operandB]){
-          cpu->FL = 1;
-        }
-        else if (cpu->registers[operandA]< cpu->registers[operandB]){
-          cpu->FL = 1;
-        }
-          break;
+     case CMP:
+      alu(cpu, ALU_CMP, operandA, operandB);
+      break;
 
       case JMP:
         cpu->PC = cpu->registers[operandA];
-        operands = 0;
+        cpu->PC += 1;
         break;
 
       case JEQ:
         if(cpu->FL == 1){
           cpu->PC = cpu->registers[operandA];
-          operands = 0;
+          cpu->PC -= 1;
         }
         break;
+
+      case JNE:
+      if (cpu->FL != 1){
+        cpu->PC = cpu->registers[operandA];
+        cpu->PC -= 1;
+      }
+      break;
 
       default:
         break;
@@ -195,6 +205,7 @@ void cpu_init(struct cpu *cpu)
   // TODO: Initialize the PC and other special registers
   cpu->PC = 0;
   cpu->sp = 7;
+  cpu->FL = 0;
 
   memset(cpu->registers, 0, sizeof(cpu->registers));
   memset(cpu->ram, 0, sizeof(cpu->ram));
